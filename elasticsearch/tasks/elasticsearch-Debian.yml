@@ -8,11 +8,10 @@
 - name: Install required packages
   apt: name={{ item }} state=present
   with_items:
-  - python-software-properties
+  - software-properties-common
   - curl
   - python-pip
   - iftop
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version != '18.04'
   tags:
     - installdeps
 
