@@ -1,0 +1,63 @@
+---
+- name: Create directory for certs
+  file:
+    path: /etc/elasticsearch/{{certs_dir}}
+    owner: elasticsearch
+    group: elasticsearch
+    recurse: yes
+    state: directory
+
+- name: Generating an CA with or without password
+  shell: {{es_home}}/bin/elasticsearch-certutil ca --out "{{tmp_certs_path}}/{{ca_name}}.p12" --pass "{{ca_password}}"
+  no_log: True
+  when: inventory_hostname == ansible_play_hosts[0] and ca_password is defined
+
+- name: Generating an SSL/TLS keystore and truststore  with password
+  shell: {{es_home}}/bin/elasticsearch-certutil cert --ca "{{tmp_certs_path}}/{{ca_name}}.p12" --ca-pass "{{ca_password}}" --out "{{tmp_certs_path}}/{{item}}.p12" --pass "{{keystore_password}}"
+  no_log: True
+  when: inventory_hostname == ansible_play_hosts[0] and ca_password is defined and keystore_password is defined
+  with_items:
+    - {{certs}}
+
+- name: Generating an SSL/TLS keystore and truststore without password
+  shell: {{es_home}}/bin/elasticsearch-certutil cert --ca "{{tmp_certs_path}}/{{ca_name}}.p12"  --out "{{tmp_certs_path}}/{{item}}.p12" --pass "{{keystore_password}}"
+  no_log: True
+  when: inventory_hostname == ansible_play_hosts[0] and ca_password is not defined and keystore_password is not defined
+  with_items:
+    - {{certs}}
+
+- name: Fetch certificates
+  fetch:
+    src: "{{ item.source }}"
+    dest: "{{itme.destination}}"
+    flat: yes
+    when: inventory_hostname == ansible_play_hosts[0]
+  with_items:
+    - {source: '{{fetch_source}}', destination: '{{fetch_destination}}'}
+
+- name: Copy SSL/TLS keystore and truststore
+  copy:
+    src: "{{ item.source }}"
+    dest: "/etc/elasticsearch/{{certs_dir}}/{{item.destination}}.p12"
+    owner: elasticsearch
+    group: elasticsearch
+    mode: "640"
+  with_items:
+    - {source: '{{fetch_destination}}', destination: '{{certs}}'}
+  notify: restart elasticsearch
+  register: copy_truststore
+
+- name: Set keystore password
+  shell: echo "{{ es_ssl_keystore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.keystore.secure_password'
+  no_log: True
+  when: es_ssl_keystore_password and (copy_keystore.changed or (es_same_keystore and copy_truststore.changed))
+  with_items:
+    - http
+    - transport
+
+- name: Set truststore password
+  shell: echo "{{ es_ssl_truststore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.truststore.secure_password'
+  no_log: True
+  when: es_ssl_truststore_password and (copy_truststore.changed or (es_same_keystore and copy_keystore.changed))
+  with_items:
+    - http

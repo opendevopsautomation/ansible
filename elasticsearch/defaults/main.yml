@@ -1,0 +1,40 @@
+---
+base_url: "https://artifacts.elastic.co/downloads/elasticsearch"
+package_name: "elasticsearch-7.5.0-amd64.deb"
+certs_dir: certs
+x_pack_security: "false"
+es_home: "/usr/share/elasticsearch"
+tmp_certs_path: "/tmp"
+ca_name: "elastic-ca"
+certs:
+  - {{keystore_name}
+  - {{truststore_name}
+keystore_name: "elastic-keystore"
+truststore_name: "elastic-truststore"
+fetch_path: "/tmp/"
+fetch_source:
+  - '{{tmp_certs_path}}/{{keystore_name}}'
+  - '{{tmp_certs_path}}/{{truststore_name}}'
+fetch_destination:
+  - '{{fetch_path}}/{{keystore_name}}'
+  - '{{fetch_path}}/{{truststore_name}}'
+es_clustername: "es_cluster"
+es_ssl_verification_mode: "certificate"
+es_data_dir: /data/elasticsearch/data
+es_log_dir: /data/elasticsearch/logs
+es_service_name: elasticsearch
+es_systemd_dir: /etc/systemd/system/elasticsearch.service.d
+es_mount_point: /dev/xvdf
+es_mount_dir: /data
+deb_bucket: digital-commonpkg
+aws_region: ap-south-1
+nodedata: "false"
+nodemaster: "false"
+nodeingest: "true"
+cross_cluster_connect: "false"
+process_limit: 65536
+file_limit: 65536
+limitf_size: infinity
+limit_cpu: infinity
+limit_as: infinity
+limit_memlock: infinity

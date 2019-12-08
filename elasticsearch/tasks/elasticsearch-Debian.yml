@@ -1,0 +1,21 @@
+---
+- name: Update and upgrade apt packages
+  apt:
+    update_cache: yes
+  become: true
+  tags: install
+
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+  - python-software-properties
+  - curl
+  - python-pip
+  - iftop
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version != '18.04'
+  tags:
+    - installdeps
+
+- name: Install elasticsearch
+  apt:
+    deb: /tmp/{{ package_name }}

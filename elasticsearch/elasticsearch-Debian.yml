@@ -1,0 +1,41 @@
+---
+- name: Update and upgrade apt packages
+  apt:
+    update_cache: yes
+  become: true
+  tags: install
+
+- name: Install tools for adding PPA repositories
+  apt: name={{ item }} state=present
+  with_items:
+  - python-software-properties
+  when: ansible_distribution_version != '18.04'
+  tags:
+    - installdeps
+
+- name: Install tools for adding PPA repositories
+  apt: name={{ item }} state=present
+  with_items:
+  - software-properties-common
+  when: ansible_distribution_version == '18.04'
+  tags:
+    - installdeps
+
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+  - curl
+  - python-pip
+  - iftop
+  - wget
+  tags:
+    - installdeps
+
+- name: Install elasticsearch
+  apt:
+    deb: /tmp/{{package_name}}
+
+- name: elasticsearch | add start script
+  template: src=override.conf.j2 dest={{ es_systemd_dir}}/override.conf mode=644
+  notify:
+    - restart elasticsearch

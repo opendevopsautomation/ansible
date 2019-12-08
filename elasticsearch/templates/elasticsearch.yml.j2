@@ -1,0 +1,46 @@
+cluster.name: "{{ es_clustername }}"
+
+
+node.name: "{{ ansible_hostname }}"
+
+path.data: "{{ es_data_dir }}"
+path.logs: "{{ es_log_dir }}"
+
+bootstrap.memory_lock: true
+
+network.host: [_site_ , localhost]
+
+{%if (elasticsearch_version.split('.')[0]) >= "7" %}
+discovery.seed_hosts: [{% for host in groups [es_master_node] %}{{host}}{% if not loop.last %}, {% endif %}{% endfor %}]
+
+{%if es_master_node is defined %}
+cluster.initial_master_nodes: [{% for host in groups [es_master_node] %}{{host}}{% if not loop.last %}, {% endif %}{% endfor %}]
+{% else %}
+cluster.initial_master_nodes: {{ es_master_ip }}
+{% endif %}
+
+{% else %}
+discovery.zen.minimum_master_nodes: {{ es_master_count }}
+{%if es_master_node is defined %}
+discovery.zen.ping.unicast.hosts: [{% for host in groups [es_master_node] %}{{host}}{% if not loop.last %}, {% endif %}{% endfor %}]
+{% else %}
+discovery.zen.ping.unicast.hosts: {{ es_master_ip }}
+{% endif %}
+{% endif %}
+
+node.data: {{ nodedata }}
+node.master: {{ nodemaster }}
+node.ingest: {{ nodeingest }}
+search.remote.connect: {{ cross_cluster_connect }}
+{%if x_pack_security is defined  %}
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: "{{ es_ssl_verification_mode }}"
+xpack.security.transport.ssl.keystore.path: /etc/elasticsearch/{{certs_dir}}/{{keystore_name}}.p12
+xpack.security.transport.ssl.truststore.path: /etc/elasticsearch/{{certs_dir}}/{{truststore_name}}.p12
+
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.verification_mode: "{{ es_ssl_verification_mode }}"
+xpack.security.http.ssl.keystore.path: /etc/elasticsearch/{{certs_dir}}/{{keystore_name}}.p12
+xpack.security.http.ssl.truststore.path: /etc/elasticsearch/{{certs_dir}}/{{truststore_name}}.p12
+{% endif %}
