@@ -10,7 +10,7 @@ bootstrap.memory_lock: true
 
 network.host: [_site_ , localhost]
 
-{%if (elasticsearch_version.split('.')[0]) >= "7" %}
+{%if (package_name.split('-')[1].split('.')[0]) >= "7" %}
 discovery.seed_hosts: [{% for host in groups [es_master_node] %}{{host}}{% if not loop.last %}, {% endif %}{% endfor %}]
 
 {%if es_master_node is defined %}
