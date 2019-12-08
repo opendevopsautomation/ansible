@@ -26,8 +26,6 @@ es_service_name: elasticsearch
 es_systemd_dir: /etc/systemd/system/elasticsearch.service.d
 es_mount_point: /dev/xvdf
 es_mount_dir: /data
-deb_bucket: digital-commonpkg
-aws_region: ap-south-1
 nodedata: "false"
 nodemaster: "false"
 nodeingest: "true"
