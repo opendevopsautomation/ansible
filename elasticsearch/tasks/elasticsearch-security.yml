@@ -50,7 +50,7 @@
 - name: Set keystore password
   shell: echo "{{ es_ssl_keystore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.keystore.secure_password'
   no_log: True
-  when: es_ssl_keystore_password and (copy_keystore.changed or (es_same_keystore and copy_truststore.changed))
+  when: es_ssl_keystore_password 
   with_items:
     - http
     - transport
@@ -58,6 +58,6 @@
 - name: Set truststore password
   shell: echo "{{ es_ssl_truststore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.truststore.secure_password'
   no_log: True
-  when: es_ssl_truststore_password and (copy_truststore.changed or (es_same_keystore and copy_keystore.changed))
+  when: es_ssl_truststore_password 
   with_items:
     - http
