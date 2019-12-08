@@ -1,0 +1,8 @@
+---
+- name: restart elasticsearch
+  systemd:
+    name: "{{ es_service_name }}"
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+  run_once: true

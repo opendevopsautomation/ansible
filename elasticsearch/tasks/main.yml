@@ -1,0 +1,56 @@
+---
+- name:  Get elasticsearch debian package from S3
+  get_url:
+    url: "{{ base_url }}-{{package_name}}"
+    dest: /tmp/{{ package_name }}
+
+- import_tasks: disk.yml
+  when: es_mount_disk is defined
+
+
+- name: Include Debian Elasticsearch
+  include: elasticsearch-debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Inclue X-Pack Security SSL/TLS
+  inclue: elasticsearch-security.yml
+  when: x_pack_security is defined
+
+- name: Create Elasticsearch directory
+  file:
+    path: "{{item}}"
+    state: directory
+    recurse: yes
+    owner: elasticsearch
+    group: elasticsearch
+  with_items:
+    - "{{ es_data_dir }}"
+    - "{{ es_log_dir }}"
+    - "{{ es_systemd_dir }}"
+
+- name: Copy Elasticsearch Config
+  template:
+    src: "elasticsearch.yml.j2"
+    dest: "/etc/elasticsearch/elasticsearch.yml"
+    backup: yes
+  notify:
+    - restart elasticsearch
+
+- name: Set jvm options heap size
+  lineinfile:
+    path: /etc/elasticsearch/jvm.options
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    backrefs: yes
+    backup: yes
+  with_items:
+    - { regexp: '^-Xms', line: '-Xms{{ (ansible_memtotal_mb/2)|int|abs }}m' }
+    - { regexp: '^-Xmx', line: '-Xmx{{ (ansible_memtotal_mb/2)|int|abs }}m' }
+  notify:
+    - restart elasticsearch
+
+- name: Cleanup package
+  file:
+    path: /tmp/{{ package_name }}
+    state: absent
