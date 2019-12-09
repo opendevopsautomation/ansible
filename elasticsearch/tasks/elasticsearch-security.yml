@@ -32,7 +32,6 @@
     dest: "{{ item.dest }}"
     flat: yes
   when: inventory_hostname == ansible_play_hosts[0]
-  tags: [fetch]
   with_items:
     - "{{certs}}"
 
@@ -43,7 +42,6 @@
     owner: elasticsearch
     group: elasticsearch
     mode: "640"
-  tags: [fetch]
   with_items:
     - "{{certs}}"
   notify: restart elasticsearch
@@ -64,3 +62,18 @@
   with_items:
     - http
     - transport
+
+- name: Cleanup certificates
+  file:
+    path:  "{{ item.source }}" 
+    state: absent
+  when: inventory_hostname == ansible_play_hosts[0]
+  with_items:
+    - "{{certs}}"
+
+- name: Cleanup certificates
+  file:
+    path:  "{{ item.dest }}"
+    state: absent
+  with_items:
+  delegate_to: 127.0.0.1
