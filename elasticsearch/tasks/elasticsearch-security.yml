@@ -61,3 +61,4 @@
   when: es_ssl_truststore_password 
   with_items:
     - http
+    - transport
