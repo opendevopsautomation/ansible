@@ -76,4 +76,5 @@
     path:  "{{ item.dest }}"
     state: absent
   with_items:
+    - "{{certs}}"
   delegate_to: 127.0.0.1
