@@ -13,7 +13,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: Inclue X-Pack Security SSL/TLS
-  inclue: elasticsearch-security.yml
+  include: elasticsearch-security.yml
   when: x_pack_security is defined
 
 - name: Create Elasticsearch directory
