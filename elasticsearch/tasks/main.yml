@@ -1,7 +1,7 @@
 ---
 - name:  Get elasticsearch debian package from S3
   get_url:
-    url: "{{ base_url }}-{{package_name}}"
+    url: "{{ base_url }}/{{package_name}}"
     dest: /tmp/{{ package_name }}
 
 - import_tasks: disk.yml
