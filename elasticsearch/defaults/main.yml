@@ -6,8 +6,6 @@ x_pack_security: "false"
 es_home: "/usr/share/elasticsearch"
 tmp_certs_path: "/tmp"
 ca_name: "elastic-ca"
-keystore_name: "elastic-keystore"
-truststore_name: "elastic-truststore"
 es_clustername: "es_cluster"
 es_ssl_verification_mode: "certificate"
 es_data_dir: /data/elasticsearch/data
@@ -26,14 +24,12 @@ limitf_size: infinity
 limit_cpu: infinity
 limit_as: infinity
 limit_memlock: infinity
-truststore_password: '{{keystore_password}}'
 certs_name:
   - {name: '{{keystore_name}}', pass: '{{keystore_password}}'}
   - {name: '{{truststore_name}}', pass: '{{truststore_password}}'}
 truststore_password: '{{keystore_password}}'
 keystore_name: "elastic-keystore"
 truststore_name: "elastic-truststore"
-fetch_path: "/tmp"
 certs:
   - {source: '{{tmp_certs_path}}/{{keystore_name}}.p12', dest: '{{tmp_certs_path}}/{{keystore_name}}.p12'}
   - {source: '{{tmp_certs_path}}/{{truststore_name}}.p12', dest: '{{tmp_certs_path}}/{{truststore_name}}.p12'}
