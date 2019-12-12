@@ -10,21 +10,21 @@
 - name: Generating an CA with or without password
   shell: "{{es_home}}/bin/elasticsearch-certutil ca --out {{tmp_certs_path}}/{{ca_name}}.p12 --pass {{ca_password}}"
   no_log: True
-  when: inventory_hostname == ansible_play_hosts[0] and ca_password is defined
+  when: inventory_hostname == ansible_play_hosts[0] 
 
 - name: Generating an SSL/TLS keystore and truststore  with password
-  shell: "{{es_home}}/bin/elasticsearch-certutil cert --ca {{tmp_certs_path}}/{{ca_name}}.p12 --ca-pass {{ca_password}} --out {{tmp_certs_path}}/{{item.name}}.p12 --pass {{item.pass}}"
+  shell: "{{es_home}}/bin/elasticsearch-certutil cert --ca {{tmp_certs_path}}/{{ca_name}}.p12 --ca-pass {{ca_password}} --out {{ item.source }} --pass {{item.pass}}"
   no_log: True
-  when: inventory_hostname == ansible_play_hosts[0] and ca_password is defined and keystore_password is defined
+  when: inventory_hostname == ansible_play_hosts[0] and keystore_password is defined
   with_items:
-    - '{{certs_name}}'
+    - '{{certs}}'
 
 - name: Generating an SSL/TLS keystore and truststore without password
-  shell: "{{es_home}}/bin/elasticsearch-certutil cert --ca {{tmp_certs_path}}/{{ca_name}}.p12  --out {{tmp_certs_path}}/{{item}}.p12 --pass {{keystore_password}}"
+  shell: "{{es_home}}/bin/elasticsearch-certutil cert --ca {{tmp_certs_path}}/{{ca_name}}.p12  --out {{ item.source }}  --pass \"\""
   no_log: True
-  when: inventory_hostname == ansible_play_hosts[0] and ca_password is not defined and keystore_password is not defined
+  when: inventory_hostname == ansible_play_hosts[0] and keystore_password is not defined
   with_items:
-    - '{{certs_name}}'
+    - '{{certs}}'
 
 - name: Fetch certificates
   fetch:
@@ -37,7 +37,7 @@
 
 - name: Copy SSL/TLS keystore and truststore
   copy:
-    src: "{{ item.source }}"
+    src: "{{ item.dest }}"
     dest: "/etc/elasticsearch/{{certs_dir}}/"
     owner: elasticsearch
     group: elasticsearch
@@ -45,7 +45,6 @@
   with_items:
     - "{{certs}}"
   notify: restart elasticsearch
-  register: copy_truststore
 
 - name: Set keystore password
   shell: echo "{{ es_ssl_keystore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.keystore.secure_password'

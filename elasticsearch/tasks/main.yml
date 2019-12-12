@@ -1,5 +1,5 @@
 ---
-- name:  Get elasticsearch debian package from S3
+- name:  Get elasticsearch debian package from public repository
   get_url:
     url: "{{ base_url }}/{{package_name}}"
     dest: /tmp/{{ package_name }}

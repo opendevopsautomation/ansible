@@ -24,12 +24,10 @@ limitf_size: infinity
 limit_cpu: infinity
 limit_as: infinity
 limit_memlock: infinity
-certs_name:
-  - {name: '{{keystore_name}}', pass: '{{keystore_password}}'}
-  - {name: '{{truststore_name}}', pass: '{{truststore_password}}'}
 truststore_password: '{{keystore_password}}'
 keystore_name: "elastic-keystore"
 truststore_name: "elastic-truststore"
 certs:
-  - {source: '{{tmp_certs_path}}/{{keystore_name}}.p12', dest: '{{tmp_certs_path}}/{{keystore_name}}.p12'}
-  - {source: '{{tmp_certs_path}}/{{truststore_name}}.p12', dest: '{{tmp_certs_path}}/{{truststore_name}}.p12'}
+  - {source: '{{tmp_certs_path}}/{{keystore_name}}.p12', dest: '{{tmp_certs_path}}/{{keystore_name}}.p12', pass: '{{keystore_password}}'}
+  - {source: '{{tmp_certs_path}}/{{truststore_name}}.p12', dest: '{{tmp_certs_path}}/{{truststore_name}}.p12', pass: '{{truststore_password}}'}
+ca_password: ""
