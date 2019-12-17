@@ -5,10 +5,10 @@ A kibana 7.x role with x-pack security
 
 Requirements
 ------------
-
+```
 ansible_vault to encrypt the sensitive information. e.g  ansible-vault encrypt_string --vault-id ~/.ansible_vault 'example@123' --name 'es_pass'
 We are assuming that this role is running from central ansible node and elasticsearch nodes are accessible from ansible to fetch the certificates.
-
+```
 
 Role Variables
 --------------
