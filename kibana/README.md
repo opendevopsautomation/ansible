@@ -12,14 +12,14 @@ We are assuming that this role is running from central ansible node and elastics
 
 Role Variables
 --------------
-
+```
 cert_pass has same encrypted password which was used to generate the elasticsearch certificates.
 es_username is the username used to access elasticsearch
 es_pass is password of the elasticsearch user.
 extra_config used for additional configuration.
 es_host is the host vars of elasticsearch cluster.
 To override default variable,define it in hostvars, group vars etc
-
+```
 
 Dependencies
 ------------
