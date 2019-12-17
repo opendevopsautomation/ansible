@@ -33,11 +33,6 @@ Example Playbook
       roles:
          - { role: kibana, tags: ['kibana'] }
 
-License
--------
-
-BSD
-
 Author Information
 ------------------
 
