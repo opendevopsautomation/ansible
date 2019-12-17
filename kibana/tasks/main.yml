@@ -1,0 +1,44 @@
+---
+- name:  Get Kibana package from public repository
+  get_url:
+    url: "{{ base_url }}/{{package_name}}"
+    dest: /tmp/{{ package_name }}
+
+- name: Include Debian Kibana
+  include: kibana-debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Inclue X-Pack Security SSL/TLS
+  include: kibana-security.yml
+  when: x_pack_security is defined
+
+- name: create kibana log directory
+  file:
+    path: "{{item}}"
+    state: directory
+    recurse: yes
+    owner: kibana
+    group: kibana
+  with_items:
+    - "{{ kibana_log_dir }}"
+
+- name: Set up kibana.yml
+  template: src={{ kibana_template_name }}.j2 dest=/etc/kibana/kibana.yml
+  tags: ['kibana_config']
+  notify: restart kibana
+
+- name: copy kibana config
+  template:
+    src: "kibana.service.j2"
+    dest: "/etc/systemd/system/kibana.service"
+    backup: yes
+  notify:
+    - restart kibana
+  tags: ['service_config']
+
+- name: enable service kibana and ensure it is not masked
+  systemd:
+    name: kibana
+    enabled: yes
+    masked: no
+  tags: ['service_config']    

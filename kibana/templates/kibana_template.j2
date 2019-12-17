@@ -1,0 +1,21 @@
+server.host: {{ ansible_default_ipv4.address }}
+
+{%if (package_name.split('-')[1].split('.')[0]) >= "7" %}
+elasticsearch.hosts: ["{{ "https" if x_pack_security == true else "http" }}://{{kibana_es_host}}:{{kibana_es_port}}"]
+{% else %}
+elasticsearch.url: "http://{{kibana_es_host}}:{{kibana_es_port}}"
+{% endif %}
+
+elasticsearch.requestTimeout: {{ kibana_es_request_timeout_ms }}
+
+{% for item in extra_config %}
+{{ item.key }}: {{ item.value }}
+{% endfor %}
+
+{%if x_pack_security == 'true' %}
+elasticsearch.username: "{{es_username}}"
+elasticsearch.password: "{{es_pass}}"
+elasticsearch.ssl.verificationMode: "{{es_ssl_verificationMode}}"
+elasticsearch.ssl.certificateAuthorities: /etc/kibana/{{certs_dir}}/{{pem_cert}}
+xpack.security.enabled: true
+{% endif %}

@@ -1,0 +1,20 @@
+---
+- name: Update and upgrade apt packages
+  apt:
+    update_cache: yes
+  become: true
+
+
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+  - software-properties-common
+  - curl
+  - python-pip
+  - iftop
+  tags:
+    - installdeps
+
+- name: Install kibana
+  apt:
+    deb: /tmp/{{ package_name }}

@@ -1,0 +1,43 @@
+---
+- name: Create directory for certs
+  file:
+    path: /etc/Kibana/{{certs_dir}}
+    owner: Kibana
+    group: kibana
+    recurse: yes
+    state: directory
+
+- name: Fetch certificate from elasticsearch node to ansible node
+  fetch:
+    src: /etc/elasticsearch/{{es_certs_dir}}/{{cert_name}}
+    dest: "{{tmp_certs_path}}/{{cert_name}}"
+    flat: yes
+  delegate_to: "{{groups[es_host][0]}}"
+
+- name: push certificate from ansible node to kibana node
+  copy:
+    src: "{{tmp_certs_path}}/{{cert_name}}"
+    dest: "{{tmp_certs_path}}/{{cert_name}}"
+    mode: "640"
+
+- name: convert certificate without logging and cert_pass is the password of certificate
+  shell: openssl pkcs12 -in {{tmp_certs_path}}/{{cert_name}} -cacerts -nokeys -out /etc/kibana/{{certs_dir}}/{{pem_cert}}  -passin pass:{{cert_pass}}
+  no_log: True
+
+- name: Change ownership of certificate
+  file:
+    path: /etc/kibana/{{certs_dir}}/{{pem_cert}}
+    state: file
+    owner: kibana
+    group: kibana
+
+- name: Cleanup certificates
+  file:
+    path: "{{tmp_certs_path}}/{{cert_name}}"
+    state: absent
+  delegate_to: 127.0.0.1
+
+- name: Cleanup certificates
+  file:
+    path: "{{tmp_certs_path}}/{{cert_name}}"
+    state: absent
