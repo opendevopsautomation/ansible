@@ -37,7 +37,7 @@ Example Playbook
 
 Reference
 ------------
-[a link](https://github.com/elastic/ansible-elasticsearch/blob/master/README.md)         
+[Official Elasticsearch repo](https://github.com/elastic/ansible-elasticsearch/blob/master/README.md)         
 
 Author Information
 ------------------
