@@ -1,7 +1,7 @@
 ---
 - name:  Get elasticsearch package from public repository
   get_url:
-    url: "{{ base_url }}/{{package_name}}"
+    url: "{{ base_url }}/{{ package_name }}"
     dest: /tmp/{{ package_name }}
 
 - import_tasks: disk.yml
@@ -18,7 +18,7 @@
 
 - name: Create Elasticsearch directory
   file:
-    path: "{{item}}"
+    path: "{{ item }}"
     state: directory
     recurse: yes
     owner: elasticsearch
@@ -55,7 +55,7 @@
     name: elasticsearch
     enabled: yes
     masked: no
-  tags: ['service_config']    
+  tags: ['service_config']
 
 - name: Cleanup package
   file:
