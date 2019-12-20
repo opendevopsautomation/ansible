@@ -30,7 +30,6 @@ truststore_name: "elastic-truststore"
 certs:
   - {source: '{{tmp_certs_path}}/{{keystore_name}}.p12', dest: '{{tmp_certs_path}}/{{keystore_name}}.p12', pass: '{{keystore_password}}'}
   - {source: '{{tmp_certs_path}}/{{truststore_name}}.p12', dest: '{{tmp_certs_path}}/{{truststore_name}}.p12', pass: '{{truststore_password}}'}
-ca_password: ""
 #encrpyted passwords
 ca_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
