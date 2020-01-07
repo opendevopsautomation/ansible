@@ -1,30 +1,37 @@
 ---
 - name: Create directory for certs
   file:
-    path: /etc/elasticsearch/{{certs_dir}}
+    path: /etc/elasticsearch/{{ certs_dir }}
     owner: elasticsearch
     group: elasticsearch
     recurse: yes
     state: directory
 
 - name: Generating an CA with or without password
-  shell: "{{es_home}}/bin/elasticsearch-certutil ca --out {{tmp_certs_path}}/{{ca_name}}.p12 --pass {{ca_password}}"
+  shell: "{{ es_home }}/bin/elasticsearch-certutil ca --out {{ tmp_certs_path }}/{{ ca_name }}.p12 --pass {{ ca_password }}"
   no_log: True
-  when: inventory_hostname == ansible_play_hosts[0] 
+  when: inventory_hostname == ansible_play_hosts[0]
+  tags:
+    - skip_ansible_lint
 
 - name: Generating an SSL/TLS keystore and truststore  with password
-  shell: "{{es_home}}/bin/elasticsearch-certutil cert --ca {{tmp_certs_path}}/{{ca_name}}.p12 --ca-pass {{ca_password}} --out {{ item.source }} --pass {{item.pass}}"
+  shell: |
+    "{{ es_home }}/bin/elasticsearch-certutil cert \
+     --ca {{ tmp_certs_path }}/{{ ca_name }}.p12 --ca-pass {{ ca_password }} \
+     --out {{ item.source }} --pass {{ item.pass }}"
   no_log: True
   when: inventory_hostname == ansible_play_hosts[0] and keystore_password is defined
   with_items:
-    - '{{certs}}'
+    - '{{ certs }}'
 
 - name: Generating an SSL/TLS keystore and truststore without password
-  shell: "{{es_home}}/bin/elasticsearch-certutil cert --ca {{tmp_certs_path}}/{{ca_name}}.p12  --out {{ item.source }}  --pass \"\""
+  shell: "{{ es_home }}/bin/elasticsearch-certutil cert --ca {{ tmp_certs_path }}/{{ ca_name }}.p12  --out {{ item.source }}  --pass \"\""
   no_log: True
   when: inventory_hostname == ansible_play_hosts[0] and keystore_password is not defined
+  tags:
+    - skip_ansible_lint
   with_items:
-    - '{{certs}}'
+    - '{{ certs }}'
 
 - name: Fetch certificates
   fetch:
@@ -33,21 +40,23 @@
     flat: yes
   when: inventory_hostname == ansible_play_hosts[0]
   with_items:
-    - "{{certs}}"
+    - "{{ certs }}"
 
 - name: Copy SSL/TLS keystore and truststore
   copy:
     src: "{{ item.dest }}"
-    dest: "/etc/elasticsearch/{{certs_dir}}/"
+    dest: "/etc/elasticsearch/{{ certs_dir }}/"
     owner: elasticsearch
     group: elasticsearch
     mode: "640"
   with_items:
-    - "{{certs}}"
+    - "{{ certs }}"
   notify: restart elasticsearch
 
 - name: Set keystore password
-  shell: echo "{{ es_ssl_keystore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.keystore.secure_password'
+  shell: |
+    set -o pipefail
+    echo "{{ es_ssl_keystore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.keystore.secure_password'
   no_log: True
   when: es_ssl_keystore_password is defined
   with_items:
@@ -55,7 +64,9 @@
     - transport
 
 - name: Set truststore password
-  shell: echo "{{ es_ssl_truststore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.truststore.secure_password'
+  shell: |
+    set -o pipefail
+    echo "{{ es_ssl_truststore_password }}" | {{ es_home }}/bin/elasticsearch-keystore add -x -f 'xpack.security.{{ item }}.ssl.truststore.secure_password'
   no_log: True
   when: es_ssl_truststore_password is defined
   with_items:
@@ -64,16 +75,16 @@
 
 - name: Cleanup certificates
   file:
-    path:  "{{ item.source }}" 
+    path:  "{{ item.source }}"
     state: absent
   when: inventory_hostname == ansible_play_hosts[0]
   with_items:
-    - "{{certs}}"
+    - "{{ certs }}"
 
 - name: Cleanup certificates
   file:
     path:  "{{ item.dest }}"
     state: absent
   with_items:
-    - "{{certs}}"
+    - "{{ certs }}"
   delegate_to: 127.0.0.1

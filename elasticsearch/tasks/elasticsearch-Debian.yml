@@ -3,7 +3,6 @@
   apt:
     update_cache: yes
   become: true
-  tags: install
 
 - name: Install required packages
   apt: name={{ item }} state=present

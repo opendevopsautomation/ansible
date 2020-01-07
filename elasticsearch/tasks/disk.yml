@@ -3,21 +3,17 @@
   apt:
     name: xfsprogs
     update_cache: yes
-    state: latest
+    state: present
 
 - name: elasticsearch | make filesystem
   filesystem:
     fstype: xfs
     dev: "{{ es_mount_point }}"
 
-- name: elasticsearch | get disk UUID
-  shell: blkid -s UUID -o value {{ es_mount_point }}
-  register: UUID
-
 - name: elasticsearch | fstab entry
   mount:
     path: "{{ es_mount_dir }}"
-    src: UUID="{{ UUID.stdout }}"
+    src: "{{ es_mount_point }}"
     fstype: xfs
     opts: noatime
     state: mounted
